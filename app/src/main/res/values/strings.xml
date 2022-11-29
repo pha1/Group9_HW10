@@ -16,5 +16,9 @@
     <string name="current_location_label">Current Location:</string>
     <string name="loading_label">Loading...</string>
     <string name="success_label">Success</string>
+    <string name="started_at_label">Started At:</string>
+    <string name="completed_at_label">Completed At: N/A</string>
+    <string name="complete_label">Complete</string>
+    <string name="distance_label">0.0 miles</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

@@ -72,22 +72,28 @@ public class LoginFragment extends Fragment {
                 String email = binding.editTextEmail.getText().toString();
                 String password = binding.editTextPassword.getText().toString();
 
-                mAuth = FirebaseAuth.getInstance();
+                if (email.isEmpty()) {
+                    Toast.makeText(getContext(), "Please enter an email.", Toast.LENGTH_SHORT).show();
+                } else if (password.isEmpty()) {
+                    Toast.makeText(getContext(), "Please enter a password.", Toast.LENGTH_SHORT).show();
+                } else {
+                    mAuth = FirebaseAuth.getInstance();
 
-                mAuth.signInWithEmailAndPassword(email, password)
-                        .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
-                            @Override
-                            public void onSuccess(AuthResult authResult) {
-                                mListener.trips();
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.d(TAG, "onFailure: " + e.getMessage());
-                                Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                            }
-                        });
+                    mAuth.signInWithEmailAndPassword(email, password)
+                            .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                                @Override
+                                public void onSuccess(AuthResult authResult) {
+                                    mListener.trips();
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.d(TAG, "onFailure: " + e.getMessage());
+                                    Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                }
             }
         });
     }

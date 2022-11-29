@@ -21,6 +21,8 @@ import android.view.ViewGroup;
 import com.example.group9_hw10.databinding.FragmentCreateNewAccountBinding;
 import com.example.group9_hw10.databinding.FragmentCreateTripBinding;
 
+import java.util.HashMap;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link CreateTripFragment#newInstance} factory method to
@@ -84,6 +86,31 @@ public class CreateTripFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         getActivity().setTitle(getResources().getString(R.string.create_trip_label));
+
+        binding.buttonSubmitTrip.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // TODO Add to Trip Database
+                String name = binding.editTextTripName.getText().toString();
+                addTripToCollection(name);
+                mListener.backToTrips();
+            }
+        });
+    }
+
+    /**
+     * Add the trip to the collection when its created
+     * By default, status is "On Going"
+     * @param name String, name of the trip
+     */
+    private void addTripToCollection(String name) {
+        // Name, Start Time, Status
+        HashMap<String, Object> trip = new HashMap<>();
+        trip.put("name", name);
+        // TODO Get Date and Time
+        trip.put("started_At", "FIX THIS TO DATE AND TIME");
+        trip.put("status", "On Going");
+
     }
 
     @Override
@@ -97,6 +124,6 @@ public class CreateTripFragment extends Fragment {
     CreateTripFragmentListener mListener;
 
     public interface CreateTripFragmentListener {
-
+        void backToTrips();
     }
 }

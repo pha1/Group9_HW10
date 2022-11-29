@@ -17,8 +17,18 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.group9_hw10.databinding.FragmentCreateNewAccountBinding;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -26,6 +36,8 @@ import com.example.group9_hw10.databinding.FragmentCreateNewAccountBinding;
 public class CreateNewAccountFragment extends Fragment {
 
     FragmentCreateNewAccountBinding binding;
+    private FirebaseAuth mAuth;
+    final String TAG = "test";
 
     public CreateNewAccountFragment() {
         // Required empty public constructor
@@ -53,8 +65,43 @@ public class CreateNewAccountFragment extends Fragment {
         binding.buttonSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO Implement Firebase Sign up
-                // TODO Add user to database
+                String name = binding.editTextName.getText().toString();
+                String email = binding.editTextCreateEmail.getText().toString();
+                String password = binding.editTextCreatePassword.getText().toString();
+
+                if(name.isEmpty()) {
+                    Toast.makeText(getContext(), "Please enter a name.", Toast.LENGTH_SHORT).show();
+                } else if(email.isEmpty()) {
+                    Toast.makeText(getContext(), "Please enter an email.", Toast.LENGTH_SHORT).show();
+                } else if(password.isEmpty()) {
+                    Toast.makeText(getContext(), "Please enter a password.", Toast.LENGTH_SHORT).show();
+                } else {
+                    // TODO Implement Firebase Sign up
+                    // TODO Add user to database
+                    mAuth = FirebaseAuth.getInstance();
+
+                    mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if(task.isSuccessful()) {
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                String user_id = mAuth.getCurrentUser().getUid();
+                                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                        .setDisplayName(name)
+                                        .build();
+                                user.updateProfile(profileUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if(task.isSuccessful()) {
+                                            addToUserCollection(name, user_id);
+                                            mListener.trips();
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
             }
         });
 
@@ -64,6 +111,22 @@ public class CreateNewAccountFragment extends Fragment {
                 mListener.cancel();
             }
         });
+    }
+
+    /**
+     * Add the new user to the collection of users
+     */
+    private void addToUserCollection(String name, String user_id) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        HashMap<String, Object> user = new HashMap<>();
+        user.put("name", name);
+        user.put("user_id", user_id);
+
+        String doc_id = db.collection("users").document().getId();
+
+        db.collection("users").document(doc_id)
+                .set(user);
     }
 
     @Override
@@ -78,5 +141,6 @@ public class CreateNewAccountFragment extends Fragment {
 
     public interface CreateNewAccountFragmentListener {
         void cancel();
+        void trips();
     }
 }

@@ -83,6 +83,21 @@ public class TripsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         getActivity().setTitle(getResources().getString(R.string.trips_label));
+
+        binding.buttonNewTrip.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mListener.newTrip();
+            }
+        });
+
+        // TODO DELETE THIS WHEN DONE TESTING
+        binding.buttonTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mListener.tripDetails();
+            }
+        });
     }
 
     @Override
@@ -96,6 +111,7 @@ public class TripsFragment extends Fragment {
     TripsFragmentListener mListener;
 
     public interface TripsFragmentListener {
-
+        void newTrip();
+        void tripDetails();
     }
 }

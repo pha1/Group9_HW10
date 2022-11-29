@@ -15,7 +15,8 @@ import android.util.Log;
 import com.example.group9_hw10.databinding.ActivityMainBinding;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class MainActivity extends AppCompatActivity implements LoginFragment.LoginFragmentListener, CreateNewAccountFragment.CreateNewAccountFragmentListener, TripsFragment.TripsFragmentListener {
+public class MainActivity extends AppCompatActivity implements LoginFragment.LoginFragmentListener, CreateNewAccountFragment.CreateNewAccountFragmentListener,
+        TripsFragment.TripsFragmentListener, CreateTripFragment.CreateTripFragmentListener {
 
     private FirebaseAuth mAuth;
     final String TAG = "test";
@@ -55,6 +56,27 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.Log
 
     @Override
     public void cancel() {
+        getSupportFragmentManager().popBackStack();
+    }
+
+    @Override
+    public void newTrip() {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.rootView, new CreateTripFragment(), "Create Trip")
+                .addToBackStack(null)
+                .commit();
+    }
+
+    @Override
+    public void tripDetails() {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.rootView, new TripDetailsFragment(), "Trip Details")
+                .addToBackStack(null)
+                .commit();
+    }
+
+    @Override
+    public void backToTrips() {
         getSupportFragmentManager().popBackStack();
     }
 }
