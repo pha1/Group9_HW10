@@ -67,15 +67,6 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.Log
                 .commit();
     }
 
-    // TODO DELETE THIS METHOD BEFORE TURNING IN
-    @Override
-    public void tripDetails() {
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.rootView, new TripDetailsFragment(), "Trip Details")
-                .addToBackStack(null)
-                .commit();
-    }
-
     @Override
     public void logout() {
         FirebaseAuth.getInstance().signOut();

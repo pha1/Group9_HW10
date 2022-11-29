@@ -24,25 +24,24 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.example.group9_hw10.databinding.FragmentCreateNewAccountBinding;
 import com.example.group9_hw10.databinding.FragmentCreateTripBinding;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.Priority;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -56,6 +55,7 @@ public class CreateTripFragment extends Fragment {
 
     FragmentCreateTripBinding binding;
     final String TAG = "test";
+    private FirebaseAuth mAuth;
 
     private Location currentLocation;
 
@@ -173,11 +173,18 @@ public class CreateTripFragment extends Fragment {
         binding.buttonSubmitTrip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                mAuth = FirebaseAuth.getInstance();
+                String user_id = mAuth.getCurrentUser().getUid();
+
                 String name = binding.editTextTripName.getText().toString();
+
                 if (binding.textViewCreateStatus.getText().toString().equals("Loading...")) {
                     Toast.makeText(getContext(), "Please wait for location to load.", Toast.LENGTH_SHORT).show();
+                } else if (name.isEmpty()) {
+                    Toast.makeText(getContext(), "Please enter a trip name.", Toast.LENGTH_SHORT).show();
                 } else {
-                    addTripToCollection(name);
+                    addTripToCollection(name, user_id);
                     mListener.backToTrips();
                 }
             }
@@ -188,8 +195,9 @@ public class CreateTripFragment extends Fragment {
      * Add the trip to the collection when its created
      * By default, status is "On Going"
      * @param name String, name of the trip
+     * @param user_id
      */
-    private void addTripToCollection(String name) {
+    private void addTripToCollection(String name, String user_id) {
 
         DateFormat df = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
         String date = df.format(Calendar.getInstance().getTime());
@@ -201,6 +209,36 @@ public class CreateTripFragment extends Fragment {
         trip.put("status", "On Going");
         trip.put("start_latitude", currentLocation.getLatitude());
         trip.put("start_longitude", currentLocation.getLongitude());
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("users").get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                            if (document.getString("user_id").equals(user_id)){
+                                addTrip(document.getId(), trip);
+                            }
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "onFailure: ");
+                    }
+                });
+    }
+
+    private void addTrip(String doc_id, HashMap<String, Object> trip) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        String trip_id = db.collection("users").document(doc_id).
+                collection("trips").document().getId();
+
+        db.collection("users").document(doc_id).
+                collection("trips").document(trip_id).set(trip);
 
     }
 

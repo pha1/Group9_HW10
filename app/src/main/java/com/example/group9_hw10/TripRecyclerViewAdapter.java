@@ -32,12 +32,30 @@ public class TripRecyclerViewAdapter extends RecyclerView.Adapter<TripRecyclerVi
 
     @Override
     public void onBindViewHolder(@NonNull TripViewHolder holder, int position) {
+        Trip trip = trips.get(position);
 
+        holder.trips = trips;
+        holder.trip = trip;
+        holder.position = position;
+
+        holder.textViewTripName.setText(trip.getName());
+        holder.textViewTripStartDate.setText(trip.getStarted_At());
+        holder.textViewTripStatus.setText(trip.getStatus());
+
+        if (trip.getCompleted_At() != null) {
+            holder.textViewTripCompletedDate.setText(trip.getCompleted_At());
+        }
+
+        if (trip.getDistance() != null) {
+            holder.textViewTripDistance.setText(String.valueOf(trip.getDistance()));
+        } else {
+            holder.textViewTripDistance.setText("");
+        }
     }
 
     @Override
     public int getItemCount() {
-        return 0;
+        return trips.size();
     }
 
     public interface ITripRecycler {

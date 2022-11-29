@@ -3,8 +3,8 @@ package com.example.group9_hw10;
 import java.io.Serializable;
 
 public class Trip implements Serializable {
-    String name, started_At, completed_At, status;
-    Double distance, start_latitude, start_longitude, end_latitude, end_longitude;
+    private String name, started_At, completed_At, status;
+    private Double distance, start_latitude, start_longitude, end_latitude, end_longitude;
 
     public String getName() {
         return name;
