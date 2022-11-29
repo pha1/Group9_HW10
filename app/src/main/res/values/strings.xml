@@ -1,5 +1,20 @@
 <resources>
     <string name="app_name">Group9_HW10</string>
-    <!-- TODO: Remove or change this placeholder text -->
+    <string name="login_label">Login</string>
+    <string name="create_account_label">Create New Account</string>
+    <string name="trips_label">Trips</string>
+    <string name="create_trip_label">Create Trip</string>
+    <string name="trip_details_label">Trip Details</string>
+    <string name="email_label">Email</string>
+    <string name="password_label">Password</string>
+    <string name="name_label">Name</string>
+    <string name="submit_label">Submit</string>
+    <string name="cancel_label">Cancel</string>
+    <string name="new_trip_label">New Trip</string>
+    <string name="on_going_label">On Going</string>
+    <string name="completed_label">Completed</string>
+    <string name="current_location_label">Current Location:</string>
+    <string name="loading_label">Loading...</string>
+    <string name="success_label">Success</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

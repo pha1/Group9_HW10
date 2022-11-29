@@ -47,6 +47,23 @@ public class CreateNewAccountFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        getActivity().setTitle(getResources().getString(R.string.create_account_label));
+
+        binding.buttonSubmit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // TODO Implement Firebase Sign up
+                // TODO Add user to database
+            }
+        });
+
+        binding.textViewCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mListener.cancel();
+            }
+        });
     }
 
     @Override
@@ -60,6 +77,6 @@ public class CreateNewAccountFragment extends Fragment {
     CreateNewAccountFragmentListener mListener;
 
     public interface CreateNewAccountFragmentListener {
-
+        void cancel();
     }
 }

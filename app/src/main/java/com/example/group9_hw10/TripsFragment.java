@@ -81,6 +81,8 @@ public class TripsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        getActivity().setTitle(getResources().getString(R.string.trips_label));
     }
 
     @Override
