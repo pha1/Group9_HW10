@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class Trip implements Serializable {
     String name, started_At, completed_At, status;
-    Double distance;
+    Double distance, start_latitude, start_longitude, end_latitude, end_longitude;
 
     public String getName() {
         return name;
@@ -46,6 +46,38 @@ public class Trip implements Serializable {
         this.distance = distance;
     }
 
+    public Double getStart_latitude() {
+        return start_latitude;
+    }
+
+    public void setStart_latitude(Double start_latitude) {
+        this.start_latitude = start_latitude;
+    }
+
+    public Double getStart_longitude() {
+        return start_longitude;
+    }
+
+    public void setStart_longitude(Double start_longitude) {
+        this.start_longitude = start_longitude;
+    }
+
+    public Double getEnd_latitude() {
+        return end_latitude;
+    }
+
+    public void setEnd_latitude(Double end_latitude) {
+        this.end_latitude = end_latitude;
+    }
+
+    public Double getEnd_longitude() {
+        return end_longitude;
+    }
+
+    public void setEnd_longitude(Double end_longitude) {
+        this.end_longitude = end_longitude;
+    }
+
     @Override
     public String toString() {
         return "Trip{" +
@@ -54,6 +86,10 @@ public class Trip implements Serializable {
                 ", completed_At='" + completed_At + '\'' +
                 ", status='" + status + '\'' +
                 ", distance=" + distance +
+                ", start_latitude=" + start_latitude +
+                ", start_longitude=" + start_longitude +
+                ", end_latitude=" + end_latitude +
+                ", end_longitude=" + end_longitude +
                 '}';
     }
 }

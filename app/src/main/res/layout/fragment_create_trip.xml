@@ -22,7 +22,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/textViewLocationLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -31,13 +31,13 @@
         app:layout_constraintTop_toBottomOf="@+id/editTextTripName" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/textViewCreateStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="@string/loading_label"
         app:layout_constraintEnd_toEndOf="@+id/editTextTripName"
-        app:layout_constraintStart_toEndOf="@+id/textView"
+        app:layout_constraintStart_toEndOf="@+id/textViewLocationLabel"
         app:layout_constraintTop_toBottomOf="@+id/editTextTripName" />
 
     <Button

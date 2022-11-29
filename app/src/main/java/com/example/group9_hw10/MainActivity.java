@@ -16,7 +16,7 @@ import com.example.group9_hw10.databinding.ActivityMainBinding;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity implements LoginFragment.LoginFragmentListener, CreateNewAccountFragment.CreateNewAccountFragmentListener,
-        TripsFragment.TripsFragmentListener, CreateTripFragment.CreateTripFragmentListener {
+        TripsFragment.TripsFragmentListener, CreateTripFragment.CreateTripFragmentListener, TripRecyclerViewAdapter.ITripRecycler {
 
     private FirebaseAuth mAuth;
     final String TAG = "test";
@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.Log
                 .commit();
     }
 
+    // TODO DELETE THIS METHOD BEFORE TURNING IN
     @Override
     public void tripDetails() {
         getSupportFragmentManager().beginTransaction()
@@ -76,7 +77,24 @@ public class MainActivity extends AppCompatActivity implements LoginFragment.Log
     }
 
     @Override
+    public void logout() {
+        FirebaseAuth.getInstance().signOut();
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.rootView, new LoginFragment(), "Login")
+                .commit();
+    }
+
+    @Override
     public void backToTrips() {
         getSupportFragmentManager().popBackStack();
+    }
+
+    @Override
+    public void goToDetails(Trip trip) {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.rootView, TripDetailsFragment.newInstance(trip), "Trip Details")
+                .addToBackStack(null)
+                .commit();
     }
 }
