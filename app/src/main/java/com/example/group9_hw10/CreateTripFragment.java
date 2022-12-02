@@ -237,6 +237,8 @@ public class CreateTripFragment extends Fragment {
         String trip_id = db.collection("users").document(doc_id).
                 collection("trips").document().getId();
 
+        trip.put("trip_id", trip_id);
+
         db.collection("users").document(doc_id).
                 collection("trips").document(trip_id).set(trip);
 

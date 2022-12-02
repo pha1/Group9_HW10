@@ -135,6 +135,7 @@ public class TripsFragment extends Fragment {
                                 trip.setStarted_At(document.getString("started_At"));
                                 trip.setStart_latitude(document.getDouble("start_latitude"));
                                 trip.setStart_longitude(document.getDouble("start_longitude"));
+                                trip.setTrip_id(document.getString("trip_id"));
                             } else {
                                 trip = document.toObject(Trip.class);
                             }

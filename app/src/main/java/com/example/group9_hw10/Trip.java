@@ -3,8 +3,22 @@ package com.example.group9_hw10;
 import java.io.Serializable;
 
 public class Trip implements Serializable {
-    private String name, started_At, completed_At, status;
-    private Double distance, start_latitude, start_longitude, end_latitude, end_longitude;
+    private String name;
+    private String started_At;
+    private String completed_At;
+    private String status;
+    private String distance;
+
+    public String getTrip_id() {
+        return trip_id;
+    }
+
+    public void setTrip_id(String trip_id) {
+        this.trip_id = trip_id;
+    }
+
+    private String trip_id;
+    private Double start_latitude, start_longitude, end_latitude, end_longitude;
 
     public String getName() {
         return name;
@@ -38,11 +52,11 @@ public class Trip implements Serializable {
         this.status = status;
     }
 
-    public Double getDistance() {
+    public String getDistance() {
         return distance;
     }
 
-    public void setDistance(Double distance) {
+    public void setDistance(String distance) {
         this.distance = distance;
     }
 
@@ -90,6 +104,7 @@ public class Trip implements Serializable {
                 ", start_longitude=" + start_longitude +
                 ", end_latitude=" + end_latitude +
                 ", end_longitude=" + end_longitude +
+                ", trip_id=" + trip_id +
                 '}';
     }
 }
