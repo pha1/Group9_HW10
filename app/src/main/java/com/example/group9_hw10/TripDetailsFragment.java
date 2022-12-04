@@ -1,9 +1,13 @@
 package com.example.group9_hw10;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationRequest;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -16,6 +20,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,7 +28,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.gms.location.CurrentLocationRequest;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.Granularity;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -34,6 +41,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.CancellationTokenSource;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -114,11 +122,6 @@ public class TripDetailsFragment extends Fragment implements OnMapReadyCallback 
         }
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
-
-        // TODO Can we avoid updating to API 31?
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY).build();
-        }
     }
 
     @Override
@@ -140,21 +143,38 @@ public class TripDetailsFragment extends Fragment implements OnMapReadyCallback 
         super.onStart();
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             getLastLocation();
-            checkSettingsAndStartLocationUpdates();
         } else {
             askLocationPermission();
         }
     }
 
-    private void checkSettingsAndStartLocationUpdates() {
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (currentLocation == null) {
+            getLastLocation();
+        }
     }
 
-    private void startLocationUpdates() {
+    private void getCurrentLocation() {
+        CurrentLocationRequest currentLocationRequest = new CurrentLocationRequest.Builder()
+                .setGranularity(Granularity.GRANULARITY_FINE)
+                .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+                .setDurationMillis(5000)
+                .setMaxUpdateAgeMillis(0)
+                .build();
 
-    }
-
-    private void stopLocationUpdates() {
-
+        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+        fusedLocationProviderClient.getCurrentLocation(currentLocationRequest, cancellationTokenSource.getToken()).addOnCompleteListener(new OnCompleteListener<Location>() {
+            @Override
+            public void onComplete(@NonNull Task<Location> task) {
+                if(task.isSuccessful()) {
+                    currentLocation = task.getResult();
+                } else {
+                    Log.d(TAG, "onComplete: " + task.getException().getMessage());
+                }
+            }
+        });
     }
 
     private void getLastLocation() {
@@ -170,7 +190,7 @@ public class TripDetailsFragment extends Fragment implements OnMapReadyCallback 
                     Log.d(TAG, "onSuccess: " + location.getLongitude());
                 } else {
                     Log.d(TAG, "onSuccess: location was null.");
-                    // TODO Request for Location
+                    getCurrentLocation();
                 }
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -184,9 +204,14 @@ public class TripDetailsFragment extends Fragment implements OnMapReadyCallback 
     private void askLocationPermission() {
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if(ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)) {
-                Log.d(TAG, "askLocationPermission: you should show an alert dialog...");
-                ActivityCompat.requestPermissions(getActivity(), new String[] {Manifest.permission.ACCESS_FINE_LOCATION},
-                        LOCATION_REQUEST_CODE);
+                showCustomDialog("Location Permission", "This app needs the location permission to enable it to find your current location.",
+                        "Ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                ActivityCompat.requestPermissions(getActivity(), new String[] {Manifest.permission.ACCESS_FINE_LOCATION},
+                                        LOCATION_REQUEST_CODE);
+                            }
+                        }, "Cancel", null);
             } else {
                 ActivityCompat.requestPermissions(getActivity(), new String[] {Manifest.permission.ACCESS_FINE_LOCATION},
                         LOCATION_REQUEST_CODE);
@@ -202,9 +227,19 @@ public class TripDetailsFragment extends Fragment implements OnMapReadyCallback 
                     if(result) {
                         // PERMISSION GRANTED
                         getLastLocation();
-                        checkSettingsAndStartLocationUpdates();
                     } else {
                         // PERMISSION NOT GRANTED
+                        if (!ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)) {
+                            showCustomDialog("Location Permission", "This app needs the location permission to function, please go to settings to allow this permission in the app settings.",
+                                    "Go to Settings", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialogInterface, int i) {
+                                            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                                    Uri.parse("package" + BuildConfig.APPLICATION_ID));
+                                            startActivity(intent);
+                                        }
+                                    }, "Cancel", null);
+                        }
                     }
                 }
             });
@@ -235,9 +270,24 @@ public class TripDetailsFragment extends Fragment implements OnMapReadyCallback 
                 // This completes the Trip through a various of
                 // nested methods
                 Log.d(TAG, "onClick: ");
-                getDistance();
+                if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    getDistance();
+                } else {
+                    askLocationPermission();
+                }
             }
         });
+    }
+
+    private void showCustomDialog(String title, String message,
+                                  String positiveBtnTitle, DialogInterface.OnClickListener positiveListener,
+                                  String negativeBtnTitle, DialogInterface.OnClickListener negativeListener) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(positiveBtnTitle, positiveListener)
+                .setNegativeButton(negativeBtnTitle, negativeListener);
+        builder.create().show();
     }
 
     private void updateUI() {
