@@ -76,8 +76,6 @@ public class CreateNewAccountFragment extends Fragment {
                 } else if(password.isEmpty()) {
                     Toast.makeText(getContext(), "Please enter a password.", Toast.LENGTH_SHORT).show();
                 } else {
-                    // TODO Implement Firebase Sign up
-                    // TODO Add user to database
                     mAuth = FirebaseAuth.getInstance();
 
                     mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {

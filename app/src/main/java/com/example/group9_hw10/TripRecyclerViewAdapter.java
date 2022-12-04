@@ -1,3 +1,10 @@
+/**
+ * Group 9 HW10
+ * TripRecyclerViewAdapter.java
+ * Phi Ha
+ * Srinath Dittakavi
+ */
+
 package com.example.group9_hw10;
 
 import android.view.LayoutInflater;

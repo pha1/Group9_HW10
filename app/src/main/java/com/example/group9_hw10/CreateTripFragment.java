@@ -124,6 +124,8 @@ public class CreateTripFragment extends Fragment {
             public void onComplete(@NonNull Task<Location> task) {
                 if(task.isSuccessful()) {
                     currentLocation = task.getResult();
+                    binding.textViewCreateStatus.setText(getResources().getString(R.string.success_label));
+                    binding.textViewCreateStatus.setTextColor(getResources().getColor(R.color.green_500));
                 } else {
                     Log.d(TAG, "onComplete: " + task.getException().getMessage());
                 }
@@ -131,6 +133,9 @@ public class CreateTripFragment extends Fragment {
         });
     }
 
+    /**
+     * Get the last known location
+     */
     private void getLastLocation() {
         Task<Location> locationTask = fusedLocationProviderClient.getLastLocation();
 
@@ -138,6 +143,7 @@ public class CreateTripFragment extends Fragment {
             @Override
             public void onSuccess(Location location) {
                 if(location != null) {
+                    // Once the location is retrieved update the UI
                     binding.textViewCreateStatus.setText(getResources().getString(R.string.success_label));
                     binding.textViewCreateStatus.setTextColor(getResources().getColor(R.color.green_500));
                     currentLocation = location;
@@ -174,6 +180,15 @@ public class CreateTripFragment extends Fragment {
         }
     }
 
+    /**
+     * Custom Dialog Message for the user when asking permissions
+     * @param title Title of the message
+     * @param message The text of the message
+     * @param positiveBtnTitle Positive button title
+     * @param positiveListener Button Listener
+     * @param negativeBtnTitle Negative button title
+     * @param negativeListener Button Listener
+     */
     private void showCustomDialog(String title, String message,
                                   String positiveBtnTitle, DialogInterface.OnClickListener positiveListener,
                                   String negativeBtnTitle, DialogInterface.OnClickListener negativeListener) {
@@ -185,6 +200,9 @@ public class CreateTripFragment extends Fragment {
         builder.create().show();
     }
 
+    /**
+     * Activity Result Launcher for Location Permission
+     */
     private ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(),
             new ActivityResultCallback<Boolean>() {
@@ -192,6 +210,7 @@ public class CreateTripFragment extends Fragment {
                 public void onActivityResult(Boolean result) {
                     if(result) {
                         // PERMISSION GRANTED
+                        // Get the last location
                         getLastLocation();
                     } else {
                         // PERMISSION NOT GRANTED
@@ -222,6 +241,7 @@ public class CreateTripFragment extends Fragment {
             @Override
             public void onClick(View view) {
 
+                // Check if permission is granted
                 if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                     mAuth = FirebaseAuth.getInstance();
                     String user_id = mAuth.getCurrentUser().getUid();
@@ -236,7 +256,8 @@ public class CreateTripFragment extends Fragment {
                         addTripToCollection(name, user_id);
                         mListener.backToTrips();
                     }
-                } else {
+                } // If not ask for permission
+                else {
                     askLocationPermission();
                 }
             }
@@ -283,6 +304,11 @@ public class CreateTripFragment extends Fragment {
                 });
     }
 
+    /**
+     * Add the initial trip information to the database
+     * @param doc_id Document ID of the document that matches with the user's id
+     * @param trip The trip containing the information to be uploaded
+     */
     private void addTrip(String doc_id, HashMap<String, Object> trip) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 

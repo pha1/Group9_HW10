@@ -1,3 +1,10 @@
+/**
+ * Group 9 HW10
+ * TripDetailsFragment.java
+ * Phi Ha
+ * Srinath Dittakavi
+ */
+
 package com.example.group9_hw10;
 
 import android.Manifest;
@@ -103,7 +110,7 @@ public class TripDetailsFragment extends Fragment implements OnMapReadyCallback 
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param trip Parameter 1.
+     * @param trip Trip that was selected.
      * @return A new instance of fragment TripDetailsFragment.
      */
     public static TripDetailsFragment newInstance(Trip trip) {
@@ -130,6 +137,7 @@ public class TripDetailsFragment extends Fragment implements OnMapReadyCallback 
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_trip_details, container, false);
 
+        // Load in the Map
         mapView = (MapView) view.findViewById(R.id.mapView2);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
@@ -151,11 +159,15 @@ public class TripDetailsFragment extends Fragment implements OnMapReadyCallback 
     @Override
     public void onResume() {
         super.onResume();
+        // Upon completing the Dialog Box for permissions
         if (currentLocation == null) {
             getLastLocation();
         }
     }
 
+    /**
+     * Get the current location of the user
+     */
     private void getCurrentLocation() {
         CurrentLocationRequest currentLocationRequest = new CurrentLocationRequest.Builder()
                 .setGranularity(Granularity.GRANULARITY_FINE)
@@ -164,11 +176,15 @@ public class TripDetailsFragment extends Fragment implements OnMapReadyCallback 
                 .setMaxUpdateAgeMillis(0)
                 .build();
 
+        // Cancellation Token
         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+        // Current Location Request
         fusedLocationProviderClient.getCurrentLocation(currentLocationRequest, cancellationTokenSource.getToken()).addOnCompleteListener(new OnCompleteListener<Location>() {
             @Override
             public void onComplete(@NonNull Task<Location> task) {
                 if(task.isSuccessful()) {
+                    // Set the current location variable to use the data retrieved
                     currentLocation = task.getResult();
                 } else {
                     Log.d(TAG, "onComplete: " + task.getException().getMessage());
@@ -177,6 +193,9 @@ public class TripDetailsFragment extends Fragment implements OnMapReadyCallback 
         });
     }
 
+    /**
+     * Get the last known location
+     */
     private void getLastLocation() {
         Task<Location> locationTask = fusedLocationProviderClient.getLastLocation();
 
@@ -189,6 +208,7 @@ public class TripDetailsFragment extends Fragment implements OnMapReadyCallback 
                     Log.d(TAG, "onSuccess: " + location.getLatitude());
                     Log.d(TAG, "onSuccess: " + location.getLongitude());
                 } else {
+                    // If the last known location was null, request the current location
                     Log.d(TAG, "onSuccess: location was null.");
                     getCurrentLocation();
                 }
@@ -201,9 +221,13 @@ public class TripDetailsFragment extends Fragment implements OnMapReadyCallback 
         });
     }
 
+    /**
+     * Ask the user for Location Permission
+     */
     private void askLocationPermission() {
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if(ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)) {
+                // Show a custom dialog message explaining why we need the permission
                 showCustomDialog("Location Permission", "This app needs the location permission to enable it to find your current location.",
                         "Ok", new DialogInterface.OnClickListener() {
                             @Override
@@ -213,12 +237,16 @@ public class TripDetailsFragment extends Fragment implements OnMapReadyCallback 
                             }
                         }, "Cancel", null);
             } else {
-                ActivityCompat.requestPermissions(getActivity(), new String[] {Manifest.permission.ACCESS_FINE_LOCATION},
-                        LOCATION_REQUEST_CODE);
+                // If the request was denied
+                // Ask the user to go to Settings to allow the permission to use the app
+                requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
             }
         }
     }
 
+    /**
+     * If the user denied access, asks the user to go to Settings to allow access to permission
+     */
     private ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(),
             new ActivityResultCallback<Boolean>() {
@@ -262,14 +290,15 @@ public class TripDetailsFragment extends Fragment implements OnMapReadyCallback 
         textViewDistance = view.findViewById(R.id.textViewDistance);
         buttonComplete = view.findViewById(R.id.buttonComplete);
 
+        // Load the Trip data
         updateUI();
 
+        // Complete Button
         view.findViewById(R.id.buttonComplete).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // This completes the Trip through a various of
-                // nested methods
-                Log.d(TAG, "onClick: ");
+                // This completes the Trip through a various of nested methods
+                // If the app does not have permission to Locations, ask for permission
                 if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                     getDistance();
                 } else {
@@ -328,6 +357,9 @@ public class TripDetailsFragment extends Fragment implements OnMapReadyCallback 
         });
     }
 
+    /**
+     * Update the Map to show the Trip data
+     */
     private void loadTrip() {
         Log.d(TAG, "loadTrip: ");
         LatLng start = new LatLng(mTrip.getStart_latitude(), mTrip.getStart_longitude());
@@ -350,8 +382,12 @@ public class TripDetailsFragment extends Fragment implements OnMapReadyCallback 
         }
     }
 
+    /**
+     * Send a request to Google Direction API to get the distance between the locations
+     */
     private void getDistance() {
 
+        // Set the end Latitude and Longitude
         mTrip.setEnd_latitude(currentLocation.getLatitude());
         mTrip.setEnd_longitude(currentLocation.getLongitude());
 
@@ -411,6 +447,10 @@ public class TripDetailsFragment extends Fragment implements OnMapReadyCallback 
         });
     }
 
+    /**
+     * Access the database to get the document id of the document that matches the
+     * current user id
+     */
     private void getUser() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -423,11 +463,15 @@ public class TripDetailsFragment extends Fragment implements OnMapReadyCallback 
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                         for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+
                             mAuth = FirebaseAuth.getInstance();
                             String user_id = mAuth.getCurrentUser().getUid();
                             Log.d(TAG, "onSuccess: " + user_id);
+
+                            // Get the user's document
                             if (document.getString("user_id").equals(user_id)){
                                 String doc_id = document.getId();
+                                // With this document id, access the user's trip data
                                 getTrip(doc_id, date);
                             }
                         }
@@ -441,16 +485,23 @@ public class TripDetailsFragment extends Fragment implements OnMapReadyCallback 
                 });
     }
 
+    /**
+     * Given the document id that contains the user's trips, update the trip information
+     * @param doc_id The document that contains the user's data and trip information
+     * @param date The Date and Time the user clicked on the "Complete" button
+     */
     private void getTrip(String doc_id, String date) {
         Log.d(TAG, "getTrip: ");
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+        // Trip HashMap Object
         HashMap<String, Object> trip = new HashMap<>();
         trip.put("completed_At", date);
         trip.put("end_latitude", currentLocation.getLatitude());
         trip.put("end_longitude", currentLocation.getLongitude());
         trip.put("distance", mTrip.getDistance());
 
+        // Merge the completed trip information to the existing trip document
         db.collection("users").document(doc_id)
                 .collection("trips").document(mTrip.getTrip_id())
                 .set(trip, SetOptions.merge())
@@ -467,6 +518,8 @@ public class TripDetailsFragment extends Fragment implements OnMapReadyCallback 
                             }
                         });
 
+        // Update the status from "On Going" to "Completed"
+        // When completed updating the database, update the UI and Map with the new data
         db.collection("users").document(doc_id)
                 .collection("trips").document(mTrip.getTrip_id())
                 .update("status", "Completed")
@@ -476,19 +529,23 @@ public class TripDetailsFragment extends Fragment implements OnMapReadyCallback 
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                // Update the local Trip Object with the date and status message
+                                updateTrip(date);
+                                // Update the UI
                                 updateUI();
+                                // Update the Map
                                 loadTrip();
                             }
                         });
                     }
                 });
-
-        updateTrip(date, currentLocation.getLatitude(), currentLocation.getLongitude());
     }
 
-    private void updateTrip(String date, double latitude, double longitude) {
-        mTrip.setEnd_latitude(latitude);
-        mTrip.setEnd_longitude(longitude);
+    /**
+     * Update the Trip's completed Date and Status message
+     * @param date The date and time when the user clicked on "Complete"
+     */
+    private void updateTrip(String date) {
         mTrip.setCompleted_At(date);
         mTrip.setStatus("Completed");
     }

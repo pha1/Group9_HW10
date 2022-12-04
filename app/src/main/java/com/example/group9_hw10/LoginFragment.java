@@ -77,6 +77,7 @@ public class LoginFragment extends Fragment {
                 } else if (password.isEmpty()) {
                     Toast.makeText(getContext(), "Please enter a password.", Toast.LENGTH_SHORT).show();
                 } else {
+
                     mAuth = FirebaseAuth.getInstance();
 
                     mAuth.signInWithEmailAndPassword(email, password)

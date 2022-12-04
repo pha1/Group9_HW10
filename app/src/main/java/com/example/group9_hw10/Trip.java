@@ -1,3 +1,10 @@
+/**
+ * Group 9 HW10
+ * Trip.java
+ * Phi Ha
+ * Srinath Dittakavi
+ */
+
 package com.example.group9_hw10;
 
 import java.io.Serializable;

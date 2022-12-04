@@ -94,6 +94,10 @@ public class TripsFragment extends Fragment {
 
     }
 
+    /**
+     * Get the user's document from the database
+     * @param user_id
+     */
     private void getUser(String user_id) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -103,6 +107,7 @@ public class TripsFragment extends Fragment {
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                         for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                             if (document.getString("user_id").equals(user_id)) {
+                                // Get the data corresponding with the user
                                 getData(document.getId());
                             }
                         }
@@ -116,10 +121,15 @@ public class TripsFragment extends Fragment {
                 });
     }
 
+    /**
+     * Get all of the Trip data from the user's document
+     * @param doc_id
+     */
     private void getData(String doc_id) {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+        // Parse all the Trip information
         db.collection("users").document(doc_id).collection("trips")
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
